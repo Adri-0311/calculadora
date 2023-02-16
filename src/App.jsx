@@ -1,10 +1,10 @@
+import { React, useState } from 'react';
+import { evaluate } from 'mathjs';
 import './App.css';
 import Boton from './componentes/Boton.jsx';
 import Pantalla from './componentes/Pantalla.jsx';
 import BotonClear from './componentes/BotonClear.jsx';
 import LogoFreecodecamp from './componentes/LogoFreecodecamp.jsx';
-import { useState } from 'react';
-import { evaluate } from 'mathjs';
 
 function App() {
 

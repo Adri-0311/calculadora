@@ -1,3 +1,4 @@
+import React from 'react';
 import '../css/Boton.css';
 
 export default function Boton(props) {

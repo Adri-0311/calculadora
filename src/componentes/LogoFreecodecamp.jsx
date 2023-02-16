@@ -1,3 +1,4 @@
+import React from 'react';
 import freeCodeCampLogo from '../img/freecodecamp-logo.svg';
 import '../css/LogoFreecodecamp.css';
 
