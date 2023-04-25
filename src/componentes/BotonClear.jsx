@@ -2,8 +2,11 @@ import React from 'react';
 import '../css/BotonClear.css';
 
 const BotonClear = (props) => (
-  <button className="boton-clear"
-    onClick={props.manejarClear}>
+  <button
+    id={props.identificador}
+    className="boton-clear"
+    onClick={props.manejarClear}
+  >
     {props.children}
   </button>
 );
