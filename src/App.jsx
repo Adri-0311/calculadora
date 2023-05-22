@@ -11,6 +11,7 @@ function App() {
       valorActual: '0',
       valorPrevio: '0',
       formula: '',
+      decimal: false,
     },
     IS_OPERATOR = new RegExp('[+*/-]'),
     ENDS_WITH_OPERATOR = new RegExp('[+*/-]$');
@@ -18,46 +19,85 @@ function App() {
   const [input, setInut] = useState(INIT_VALUES);
 
   /**
-   *
-   * Check the input and manage the return to show in the display element
-   * @param {*} val Input element
-   * @returns
-   */
-  const manageInput = (val) => {
-    if (IS_OPERATOR.test(val)) {
-      return val;
-    } else if (val !== '0' && input.valorActual === '0') {
-      return val;
-    }
-    return val;
-  };
-
-  /**
    * Setting the necessary values to process the formula
    * @param {*} val Input element
    */
   const addInput = (val) => {
-    let valProcessed = manageInput(val);
-    setInut({
-      valorActual: valProcessed,
-      valorPrevio: input.valorActual,
-      formula: input.formula + valProcessed,
-    });
+    if (IS_OPERATOR.test(val)) {
+      setInut({
+        ...input,
+        valorActual: val,
+        valorPrevio: input.valorActual,
+        formula: input.formula + val,
+      });
+      return;
+    }
+
+    if (val === '.' && !input.decimal) {
+      // evita varios . decimales
+      setInut({
+        ...input,
+        valorActual: val,
+        valorPrevio: input.valorActual,
+        formula: input.formula + val,
+        decimal: true,
+      });
+    } else if (val === '0' && input.formula === '') {
+      // evita multiples 0 a la izquierda
+      return;
+    } else if (IS_OPERATOR.test(input.valorActual)) {
+      // comportamiento al recibir un operador
+      setInut({
+        ...input,
+        valorActual: val,
+        formula: input.formula + val,
+      });
+    } else if (
+      val !== '0' &&
+      input.valorActual === '0' &&
+      input.valorPrevio === '0'
+    ) {
+      // ingreso del primer digito
+      setInut({
+        ...input,
+        valorActual: val,
+        formula: val,
+      });
+    } else {
+      // tras haber ingresado un digito seguir concatenendo
+      setInut({
+        ...input,
+        valorActual: input.valorActual + val,
+        formula: input.formula + val,
+      });
+    }
   };
 
   /**
-   * First checks if it ends with operator by deleting it and processes the result
+   * Call to necesary functions to obtain result
    */
-  const calcularResultado = () => {
-    let formula = input.formula;
-    if (ENDS_WITH_OPERATOR.test(formula)) {
-      formula = formula.slice(0, -1);
-    }
+  const handleResult = () => {
+    formatFomrula();
+    calcResult();
+  };
 
-    if (formula) {
-      setInut({ ...input, valorActual: evaluate(formula), formula: formula });
+  /**
+   * Checks if it ends with operator by deleting it.
+   */
+  const formatFomrula = () => {
+    if (ENDS_WITH_OPERATOR.test(input.formula)) {
+      setInut({ ...input, formula: input.formula.slice(0, -1) });
+    }
+  };
+
+  /**
+   * Processes the result
+   */
+  const calcResult = () => {
+    if (input.formula) {
+      setInut({ ...input, valorActual: evaluate(input.formula) });
     } else {
-      alert('Ingrese algun valor...');
+      alert('Ingrese alguna operación...');
     }
   };
 
@@ -159,7 +199,7 @@ function App() {
         <div className="fila">
           <Boton
             identificador="equals"
-            manejarClick={calcularResultado}
+            manejarClick={handleResult}
             isOperator={IS_OPERATOR}
           >
             =
