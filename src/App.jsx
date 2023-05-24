@@ -24,17 +24,31 @@ function App() {
    */
   const addInput = (val) => {
     if (IS_OPERATOR.test(val)) {
-      setInut({
-        ...input,
-        valorActual: val,
-        valorPrevio: input.valorActual,
-        formula: input.formula + val,
-      });
+      manageOperator(val);
+    }
+
+    if (val === '.') {
+      manageDecimal(val);
       return;
     }
 
-    if (val === '.' && !input.decimal) {
-      // evita varios . decimales
+    if (!isNaN(Number(val))) {
+      manageDigit(val);
+    }
+  };
+
+  const manageOperator = (val) => {
+    setInut({
+      ...input,
+      valorActual: val,
+      valorPrevio: input.valorActual,
+      formula: input.formula + val,
+    });
+  };
+
+  const manageDecimal = (val) => {
+    if (!input.decimal) {
+      // evita varios '.' decimales
       setInut({
         ...input,
         valorActual: val,
@@ -42,16 +56,13 @@ function App() {
         formula: input.formula + val,
         decimal: true,
       });
-    } else if (val === '0' && input.formula === '') {
+    }
+  };
+
+  const manageDigit = (val) => {
+    if (val === '0' && input.formula === '') {
       // evita multiples 0 a la izquierda
       return;
-    } else if (IS_OPERATOR.test(input.valorActual)) {
-      // comportamiento al recibir un operador
-      setInut({
-        ...input,
-        valorActual: val,
-        formula: input.formula + val,
-      });
     } else if (
       val !== '0' &&
       input.valorActual === '0' &&
@@ -64,7 +75,7 @@ function App() {
         formula: val,
       });
     } else {
-      // tras haber ingresado un digito seguir concatenendo
+      // tras haber ingresado un digito seguir concatenando
       setInut({
         ...input,
         valorActual: input.valorActual + val,
