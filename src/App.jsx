@@ -11,12 +11,12 @@ function App() {
       valorActual: '0',
       valorPrevio: '0',
       formula: '',
-      decimal: false,
+      evaluate: false,
     },
     IS_OPERATOR = new RegExp('[+*/-]'),
     ENDS_WITH_OPERATOR = new RegExp('[+*/-]$');
 
-  const [input, setInut] = useState(INIT_VALUES);
+  const [input, setInput] = useState(INIT_VALUES);
 
   /**
    * Setting the necessary values to process the formula
@@ -29,7 +29,6 @@ function App() {
 
     if (val === '.') {
       manageDecimal(val);
-      return;
     }
 
     if (!isNaN(Number(val))) {
@@ -38,23 +37,25 @@ function App() {
   };
 
   const manageOperator = (val) => {
-    setInut({
-      ...input,
-      valorActual: val,
-      valorPrevio: input.valorActual,
-      formula: input.formula + val,
-    });
-  };
-
-  const manageDecimal = (val) => {
-    if (!input.decimal) {
-      // evita varios '.' decimales
-      setInut({
+    if (input.valorActual !== val) {
+      setInput({
         ...input,
         valorActual: val,
         valorPrevio: input.valorActual,
         formula: input.formula + val,
-        decimal: true,
+      });
+    }
+  };
+
+  const manageDecimal = (val) => {
+    const splitFormula = input.formula.split(IS_OPERATOR);
+    if (!splitFormula[splitFormula.length - 1].includes('.')) {
+      // evita varios '.' decimales
+      setInput({
+        ...input,
+        valorActual: input.valorActual + val,
+        valorPrevio: input.valorActual,
+        formula: input.formula + val,
       });
     }
   };
@@ -69,14 +70,24 @@ function App() {
       input.valorPrevio === '0'
     ) {
       // ingreso del primer digito
-      setInut({
+      setInput({
         ...input,
         valorActual: val,
         formula: val,
       });
+    } else if (input.evaluate) {
+      // si se ha realizado una operación resetea a los valores iniciales y añade los nnuevos dígitos
+      setInput({ ...INIT_VALUES, valorActual: val, formula: val });
+    } else if (IS_OPERATOR.test(input.valorActual)) {
+      // si anteriormente se introdujo un operador no se concatena en valorActual
+      setInput({
+        ...input,
+        valorActual: val,
+        formula: input.formula + val,
+      });
     } else {
       // tras haber ingresado un digito seguir concatenando
-      setInut({
+      setInput({
         ...input,
         valorActual: input.valorActual + val,
         formula: input.formula + val,
@@ -97,7 +108,7 @@ function App() {
    */
   const formatFomrula = () => {
     if (ENDS_WITH_OPERATOR.test(input.formula)) {
-      setInut({ ...input, formula: input.formula.slice(0, -1) });
+      setInput({ ...input, formula: input.formula.slice(0, -1) });
     }
   };
 
@@ -106,7 +117,11 @@ function App() {
    */
   const calcResult = () => {
     if (input.formula) {
-      setInut({ ...input, valorActual: evaluate(input.formula) });
+      setInput({
+        ...input,
+        valorActual: evaluate(input.formula),
+        evaluate: true,
+      });
     } else {
       alert('Ingrese alguna operación...');
     }
@@ -240,7 +255,7 @@ function App() {
         <div className="fila">
           <BotonClear
             identificador="clear"
-            manejarClear={() => setInut(INIT_VALUES)}
+            manejarClear={() => setInput(INIT_VALUES)}
           >
             Clear
           </BotonClear>
