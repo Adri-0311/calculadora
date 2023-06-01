@@ -37,7 +37,29 @@ function App() {
   };
 
   const manageOperator = (val) => {
-    if (input.valorActual !== val) {
+    if (input.evaluate){
+      // Tras una operación usar el resultado para la siguiente operación
+      setInput({
+        ...INIT_VALUES,
+        valorActual: val,
+        valorPrevio: '0',
+        formula: input.valorActual + val,
+      });
+    } else if (IS_OPERATOR.test(input.valorActual) && val !== '-') {
+      // Si se introducen 2 o más operadores consecutivamente nos quedamos con el último excluyendo el '-'
+      setInput({
+        ...input,
+        valorActual: val,
+        valorPrevio: input.valorActual,
+        formula:
+          input.formula
+            .split('')
+            .filter((e) => !IS_OPERATOR.test(e))
+            .join('') + val,
+      });
+    } 
+    else if (input.valorActual !== val) {
+      // ingresar otro operador
       setInput({
         ...input,
         valorActual: val,
@@ -49,7 +71,7 @@ function App() {
 
   const manageDecimal = (val) => {
     const splitFormula = input.formula.split(IS_OPERATOR);
-    if (!splitFormula[splitFormula.length - 1].includes('.')) {
+    if (!splitFormula.at(-1).includes('.')) {
       // evita varios '.' decimales
       setInput({
         ...input,
