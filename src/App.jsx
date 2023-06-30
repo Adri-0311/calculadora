@@ -283,6 +283,17 @@ function App() {
           </BotonClear>
         </div>
       </div>
+
+      <p className='original'>
+        Original app:&nbsp;
+        <a href='https://javascript-calculator.freecodecamp.rocks/' target='_balank'>
+          FCC : JavaScript Calculator
+        </a>
+      </p>
+
+      <a href='https://github.com/Adri-0311/calculadora' className='github'>
+        <i className='fa-brands fa-github'></i>
+      </a>
     </div>
   );
 }

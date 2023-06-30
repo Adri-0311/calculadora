@@ -33,3 +33,20 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+a {
+  color: paleturquoise;
+}
+
+a:hover {
+  color: palegreen;
+}
+
+.original {
+  margin: 25px;
+  color: #fff;
+}
+
+.github {
+  font-size: xx-large;
+}
