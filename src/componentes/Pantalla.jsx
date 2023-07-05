@@ -1,4 +1,3 @@
-import React from 'react';
 import '../css/Pantalla.css';
 
 const Pantalla = ({ input, formula }) => (

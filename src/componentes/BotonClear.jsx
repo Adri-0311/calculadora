@@ -1,13 +1,8 @@
-import React from 'react';
 import '../css/BotonClear.css';
 
-const BotonClear = (props) => (
-  <button
-    id={props.identificador}
-    className="boton-clear"
-    onClick={props.manejarClear}
-  >
-    {props.children}
+const BotonClear = ({ identificador, manejarClear, children }) => (
+  <button id={identificador} className='boton-clear' onClick={manejarClear}>
+    {children}
   </button>
 );
 

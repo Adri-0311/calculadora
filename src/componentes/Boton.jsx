@@ -1,16 +1,20 @@
-import React from 'react';
 import '../css/Boton.css';
 
-export default function Boton(props) {
+export default function Boton({
+  identificador,
+  isOperator,
+  children,
+  manejarClick,
+}) {
   return (
     <button
-      id={props.identificador}
+      id={identificador}
       className={`boton-contenedor ${
-        props.isOperator.test(props.children) ? 'operador' : ''
+        isOperator.test(children) ? 'operador' : ''
       }`.trim()}
-      onClick={() => props.manejarClick(props.children)}
+      onClick={() => manejarClick(children)}
     >
-      {props.children}
+      {children}
     </button>
   );
 }

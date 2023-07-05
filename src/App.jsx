@@ -1,22 +1,22 @@
-import { React, useState } from 'react';
 import { evaluate } from 'mathjs';
 import './App.css';
 import Boton from './componentes/Boton.jsx';
 import Pantalla from './componentes/Pantalla.jsx';
 import BotonClear from './componentes/BotonClear.jsx';
 import LogoFreecodecamp from './componentes/LogoFreecodecamp.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  updateInput,
+  updateInputInitial,
+  clearInput,
+} from './app/calculadora/calculadoraSlice';
 
 function App() {
-  const INIT_VALUES = {
-      valorActual: '0',
-      valorPrevio: '0',
-      formula: '',
-      evaluate: false,
-    },
-    IS_OPERATOR = new RegExp('[+*/-]'),
+  const IS_OPERATOR = new RegExp('[+*/-]'),
     ENDS_WITH_OPERATOR = new RegExp('[+*/-]$');
 
-  const [input, setInput] = useState(INIT_VALUES);
+  const input = useSelector((state) => state.inputCalc);
+  const dispatch = useDispatch();
 
   /**
    * Setting the necessary values to process the formula
@@ -37,35 +37,37 @@ function App() {
   };
 
   const manageOperator = (val) => {
-    if (input.evaluate){
+    if (input.evaluate) {
       // Tras una operación usar el resultado para la siguiente operación
-      setInput({
-        ...INIT_VALUES,
-        valorActual: val,
-        valorPrevio: '0',
-        formula: input.valorActual + val,
-      });
+      dispatch(
+        updateInputInitial({
+          valorActual: val,
+          valorPrevio: '0',
+          formula: input.valorActual + val,
+        })
+      );
     } else if (IS_OPERATOR.test(input.valorActual) && val !== '-') {
       // Si se introducen 2 o más operadores consecutivamente nos quedamos con el último excluyendo el '-'
-      setInput({
-        ...input,
-        valorActual: val,
-        valorPrevio: input.valorActual,
-        formula:
-          input.formula
-            .split('')
-            .filter((e) => !IS_OPERATOR.test(e))
-            .join('') + val,
-      });
-    } 
-    else if (input.valorActual !== val) {
+      dispatch(
+        updateInput({
+          valorActual: val,
+          valorPrevio: input.valorActual,
+          formula:
+            input.formula
+              .split('')
+              .filter((e) => !IS_OPERATOR.test(e))
+              .join('') + val,
+        })
+      );
+    } else if (input.valorActual !== val) {
       // ingresar otro operador
-      setInput({
-        ...input,
-        valorActual: val,
-        valorPrevio: input.valorActual,
-        formula: input.formula + val,
-      });
+      dispatch(
+        updateInput({
+          valorActual: val,
+          valorPrevio: input.valorActual,
+          formula: input.formula + val,
+        })
+      );
     }
   };
 
@@ -73,12 +75,13 @@ function App() {
     const splitFormula = input.formula.split(IS_OPERATOR);
     if (!splitFormula.at(-1).includes('.')) {
       // evita varios '.' decimales
-      setInput({
-        ...input,
-        valorActual: input.valorActual + val,
-        valorPrevio: input.valorActual,
-        formula: input.formula + val,
-      });
+      dispatch(
+        updateInput({
+          valorActual: input.valorActual + val,
+          valorPrevio: input.valorActual,
+          formula: input.formula + val,
+        })
+      );
     }
   };
 
@@ -92,28 +95,37 @@ function App() {
       input.valorPrevio === '0'
     ) {
       // ingreso del primer digito
-      setInput({
-        ...input,
-        valorActual: val,
-        formula: val,
-      });
+      dispatch(
+        updateInput({
+          valorActual: val,
+          formula: val,
+        })
+      );
     } else if (input.evaluate) {
       // si se ha realizado una operación resetea a los valores iniciales y añade los nnuevos dígitos
-      setInput({ ...INIT_VALUES, valorActual: val, formula: val });
+      // setInput({ ...INIT_VALUES, valorActual: val, formula: val });
+      dispatch(
+        updateInputInitial({
+          valorActual: val,
+          formula: val,
+        })
+      );
     } else if (IS_OPERATOR.test(input.valorActual)) {
       // si anteriormente se introdujo un operador no se concatena en valorActual
-      setInput({
-        ...input,
-        valorActual: val,
-        formula: input.formula + val,
-      });
+      dispatch(
+        updateInput({
+          valorActual: val,
+          formula: input.formula + val,
+        })
+      );
     } else {
       // tras haber ingresado un digito seguir concatenando
-      setInput({
-        ...input,
-        valorActual: input.valorActual + val,
-        formula: input.formula + val,
-      });
+      dispatch(
+        updateInput({
+          valorActual: input.valorActual + val,
+          formula: input.formula + val,
+        })
+      );
     }
   };
 
@@ -130,7 +142,7 @@ function App() {
    */
   const formatFomrula = () => {
     if (ENDS_WITH_OPERATOR.test(input.formula)) {
-      setInput({ ...input, formula: input.formula.slice(0, -1) });
+      dispatch(updateInput({ formula: input.formula.slice(0, -1) }));
     }
   };
 
@@ -139,145 +151,143 @@ function App() {
    */
   const calcResult = () => {
     if (input.formula) {
-      setInput({
-        ...input,
-        valorActual: evaluate(input.formula),
-        evaluate: true,
-      });
+      dispatch(
+        updateInput({ valorActual: evaluate(input.formula), evaluate: true })
+      );
     } else {
       alert('Ingrese alguna operación...');
     }
   };
 
   return (
-    <div className="App">
+    <div className='App'>
       <LogoFreecodecamp />
-      <div className="contenedor-calculadora">
+      <div className='contenedor-calculadora'>
         <Pantalla input={input.valorActual} formula={input.formula} />
-        <div className="fila">
+        <div className='fila'>
           <Boton
-            identificador="seven"
+            identificador='seven'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             7
           </Boton>
           <Boton
-            identificador="eight"
+            identificador='eight'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             8
           </Boton>
           <Boton
-            identificador="nine"
+            identificador='nine'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             9
           </Boton>
           <Boton
-            identificador="multiply"
+            identificador='multiply'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             *
           </Boton>
         </div>
-        <div className="fila">
+        <div className='fila'>
           <Boton
-            identificador="four"
+            identificador='four'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             4
           </Boton>
           <Boton
-            identificador="five"
+            identificador='five'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             5
           </Boton>
           <Boton
-            identificador="six"
+            identificador='six'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             6
           </Boton>
           <Boton
-            identificador="divide"
+            identificador='divide'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             /
           </Boton>
         </div>
-        <div className="fila">
+        <div className='fila'>
           <Boton
-            identificador="one"
+            identificador='one'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             1
           </Boton>
           <Boton
-            identificador="two"
+            identificador='two'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             2
           </Boton>
           <Boton
-            identificador="three"
+            identificador='three'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             3
           </Boton>
           <Boton
-            identificador="subtract"
+            identificador='subtract'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             -
           </Boton>
         </div>
-        <div className="fila">
+        <div className='fila'>
           <Boton
-            identificador="equals"
+            identificador='equals'
             manejarClick={handleResult}
             isOperator={IS_OPERATOR}
           >
             =
           </Boton>
           <Boton
-            identificador="zero"
+            identificador='zero'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             0
           </Boton>
           <Boton
-            identificador="decimal"
+            identificador='decimal'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             .
           </Boton>
           <Boton
-            identificador="add"
+            identificador='add'
             manejarClick={addInput}
             isOperator={IS_OPERATOR}
           >
             +
           </Boton>
         </div>
-        <div className="fila">
+        <div className='fila'>
           <BotonClear
-            identificador="clear"
-            manejarClear={() => setInput(INIT_VALUES)}
+            identificador='clear'
+            manejarClear={() => dispatch(clearInput())}
           >
             Clear
           </BotonClear>
@@ -286,7 +296,10 @@ function App() {
 
       <p className='original'>
         Original app:&nbsp;
-        <a href='https://javascript-calculator.freecodecamp.rocks/' target='_balank'>
+        <a
+          href='https://javascript-calculator.freecodecamp.rocks/'
+          target='_balank'
+        >
           FCC : JavaScript Calculator
         </a>
       </p>
